@@ -6,12 +6,15 @@ fun Point.toDisplayName(): String {
         Point.FIFTEEN -> "Fifteen"
         Point.THIRTY -> "Thirty"
         Point.FORTY -> "Forty"
+        Point.ADV -> "Advantage"
     }
 }
 
 fun buildAnnouncement(state: TennisState): String {
 
     return when (state.mode) {
+        GameMode.NEW_GAME ->
+            "New game!"
 
         GameMode.DEUCE ->
             "Deuce"

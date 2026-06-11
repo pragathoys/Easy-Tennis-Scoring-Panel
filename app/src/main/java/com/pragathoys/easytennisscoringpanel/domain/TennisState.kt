@@ -1,10 +1,11 @@
 package com.pragathoys.easytennisscoringpanel.domain
 
 enum class Point {
-    ZERO, FIFTEEN, THIRTY, FORTY
+    ZERO, FIFTEEN, THIRTY, FORTY, ADV
 }
 
 enum class GameMode {
+    NEW_GAME,
     NORMAL,
     DEUCE,
     ADV_A,

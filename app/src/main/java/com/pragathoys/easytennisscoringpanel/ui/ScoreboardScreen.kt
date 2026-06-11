@@ -42,6 +42,15 @@ fun ScoreboardScreen(vm: ScoreViewModel, speechManager: SpeechManager) {
                 else -> ""
             }
         )
+        Text(
+            text = when (state.mode) {
+                GameMode.NORMAL -> "normal"
+                GameMode.DEUCE -> "DEUCE"
+                GameMode.ADV_A -> "ADVANTAGE A"
+                GameMode.ADV_B -> "ADVANTAGE B"
+                else -> state.mode.name
+            }
+        )
 
         Spacer(Modifier.height(30.dp))
 
