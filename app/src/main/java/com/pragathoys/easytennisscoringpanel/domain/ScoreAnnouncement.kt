@@ -82,7 +82,7 @@ fun matchAnnouncement(state: TennisState): String {
         } else {
             "${state.aSets} sets all"
         }
-        return "Game. $setsScore"
+        return "Set. $setsScore"
     }
 
     if (state.inTiebreak) {

@@ -49,6 +49,7 @@ class ScoreViewModel : ViewModel() {
             // Reset to a fresh state but keep the configuration
             _state.value = TennisState(
                 matchFormat = current.matchFormat,
+                bestOfSets = current.bestOfSets,
                 playerAName = current.playerAName,
                 playerBName = current.playerBName,
                 isDoubles = current.isDoubles,
