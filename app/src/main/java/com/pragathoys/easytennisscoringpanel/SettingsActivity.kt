@@ -15,18 +15,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.pragathoys.easytennisscoringpanel.domain.MatchFormat
+import com.pragathoys.easytennisscoringpanel.speech.SpeechManager
 
 class SettingsActivity : ComponentActivity() {
     private val prefs: SharedPreferences by lazy {
         getSharedPreferences("tennis_settings", Context.MODE_PRIVATE)
     }
 
+    private lateinit var speechManager: SpeechManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        speechManager = SpeechManager(this)
+        
         setContent {
             MaterialTheme {
                 SettingsScreen(
                     prefs = prefs,
+                    speechManager = speechManager,
                     onStartMatch = { format, isDoubles, nameA, nameB, speechEnabled ->
                         // Save to persistent storage
                         prefs.edit().apply {
@@ -52,11 +58,20 @@ class SettingsActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onDestroy() {
+        speechManager.shutdown()
+        super.onDestroy()
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(prefs: SharedPreferences, onStartMatch: (MatchFormat, Boolean, String, String, Boolean) -> Unit) {
+fun SettingsScreen(
+    prefs: SharedPreferences, 
+    speechManager: SpeechManager,
+    onStartMatch: (MatchFormat, Boolean, String, String, Boolean) -> Unit
+) {
     var matchFormat by remember { 
         mutableStateOf(MatchFormat.valueOf(prefs.getString("MATCH_FORMAT", MatchFormat.TWO_SETS_AND_SUPER_TIEBREAK.name) ?: MatchFormat.TWO_SETS_AND_SUPER_TIEBREAK.name)) 
     }
@@ -118,6 +133,16 @@ fun SettingsScreen(prefs: SharedPreferences, onStartMatch: (MatchFormat, Boolean
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = speechEnabled, onCheckedChange = { speechEnabled = it })
                 Text("Enable Score Announcements")
+            }
+
+            Button(
+                onClick = { 
+                    speechManager.speak("Welcome to the Easy Tennis Score Panel!!")
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+            ) {
+                Text("Test Voice")
             }
 
             Button(

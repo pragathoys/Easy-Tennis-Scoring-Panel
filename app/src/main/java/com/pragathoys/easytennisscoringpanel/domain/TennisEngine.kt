@@ -30,6 +30,10 @@ object TennisEngine {
         var a = state.aPoint
         var b = state.bPoint
 
+        if (state.isDoubles && a == Point.FORTY && b == Point.FORTY) {
+            return winGame(state, playerA)
+        }
+
         if (playerA) a = next(a) else b = next(b)
 
         // 2. CHECK IMMEDIATE GAME WIN (IMPORTANT FIX)
@@ -39,6 +43,10 @@ object TennisEngine {
 
         // DEUCE CHECK
         if (a == Point.FORTY && b == Point.FORTY) {
+            if (state.isDoubles) {
+                // No advantage in doubles - deciding point
+                return state.copy(aPoint = a, bPoint = b, mode = GameMode.NORMAL)
+            }
             return state.copy(aPoint = a, bPoint = b, mode = GameMode.DEUCE)
         }
 

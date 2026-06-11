@@ -24,11 +24,11 @@ class SpeechManager(context: Context) : TextToSpeech.OnInitListener {
     }
 
     fun speak(text: String) {
-        if (!ready) return
+        if (!ready || text.isEmpty()) return
 
         tts?.speak(
             text,
-            TextToSpeech.QUEUE_FLUSH,
+            TextToSpeech.QUEUE_ADD,
             null,
             "score_update"
         )

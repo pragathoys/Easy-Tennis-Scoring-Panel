@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.pragathoys.easytennisscoringpanel.viewmodel.ScoreViewModel
 import com.pragathoys.easytennisscoringpanel.domain.GameMode
+import com.pragathoys.easytennisscoringpanel.domain.Point
 import com.pragathoys.easytennisscoringpanel.speech.SpeechManager
 import com.pragathoys.easytennisscoringpanel.domain.buildAnnouncement
 import com.pragathoys.easytennisscoringpanel.domain.matchAnnouncement
@@ -21,9 +22,10 @@ fun ScoreboardScreen(vm: ScoreViewModel, speechManager: SpeechManager, onOpenSet
 
     LaunchedEffect(state) {
         if (state.speechEnabled) {
-            speechManager.speak(
-                buildAnnouncement(state) + " " + matchAnnouncement(state)
-            )
+            val announcement = buildAnnouncement(state)
+            val matchStatus = matchAnnouncement(state)
+            if (announcement.isNotEmpty()) speechManager.speak(announcement)
+            if (matchStatus.isNotEmpty()) speechManager.speak(matchStatus)
         }
     }
 
@@ -76,6 +78,7 @@ fun ScoreboardScreen(vm: ScoreViewModel, speechManager: SpeechManager, onOpenSet
                 state.matchOver -> "MATCH OVER - WINNER: ${state.winner}"
                 state.isSuperTiebreak -> "IN SUPER TIEBREAK"
                 state.inTiebreak -> "IN TIEBREAK"
+                state.isDoubles && state.aPoint == Point.FORTY && state.bPoint == Point.FORTY -> "DECIDING POINT"
                 state.mode == GameMode.DEUCE -> "DEUCE"
                 else -> "LIVE"
             }
@@ -107,14 +110,6 @@ fun ScoreboardScreen(vm: ScoreViewModel, speechManager: SpeechManager, onOpenSet
                 Button(onClick = { vm.reset() }) {
                     Text("RESET")
                 }
-            }
-
-            Spacer(Modifier.height(10.dp))
-
-            Button(onClick = {
-                speechManager.speak("Welcome to the Easy Tennis Score Panel!!")
-            }) {
-                Text("Test Voice")
             }
         }
     }

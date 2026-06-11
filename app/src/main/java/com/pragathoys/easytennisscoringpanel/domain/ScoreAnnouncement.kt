@@ -39,6 +39,10 @@ fun buildAnnouncement(state: TennisState): String {
         return "Game. $gameScore"
     }
 
+    if (state.isDoubles && state.aPoint == Point.FORTY && state.bPoint == Point.FORTY) {
+        return "Forty all. Deciding point"
+    }
+
     return when (state.mode) {
         GameMode.NEW_GAME -> "New game"
 
@@ -64,8 +68,8 @@ fun matchAnnouncement(state: TennisState): String {
         return "Game, Set and Match, ${state.winner}. Score: ${state.aSets} sets to ${state.bSets}"
     }
 
-    if (state.aGames == 0 && state.bGames == 0 && (state.aSets > 0 || state.bSets > 0) && (state.aPoint!=Point.ZERO || state.bPoint!=Point.ZERO)) {
-        // Set just finished
+    if (state.aGames == 0 && state.bGames == 0 && (state.aSets > 0 || state.bSets > 0)) {
+        // Set just finished or new set starting
         return "Game and set. ${state.aSets} sets to ${state.bSets}"
     }
 

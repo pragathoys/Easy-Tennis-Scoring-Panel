@@ -163,6 +163,24 @@ class TennisEngineTest {
     }
 
     @Test
+    fun `doubles uses no-advantage deciding point`() {
+        var state = TennisState(isDoubles = true)
+        
+        // Reach 40-40
+        state = state.copy(aPoint = Point.FORTY, bPoint = Point.THIRTY)
+        state = TennisEngine.pointWon(state, false) // 40-40
+        
+        assertEquals(Point.FORTY, state.aPoint)
+        assertEquals(Point.FORTY, state.bPoint)
+        assertEquals(GameMode.NORMAL, state.mode) // Should NOT be DEUCE
+        
+        // Next point wins the game
+        state = TennisEngine.pointWon(state, true)
+        assertEquals(1, state.aGames)
+        assertEquals(Point.ZERO, state.aPoint)
+    }
+
+    @Test
     fun `super tiebreak starts after 1-1 sets`() {
         var state = TennisState(matchFormat = MatchFormat.TWO_SETS_AND_SUPER_TIEBREAK, aSets = 1, bSets = 0, bGames = 5, bPoint = Point.FORTY)
         // B wins set to make it 1-1
