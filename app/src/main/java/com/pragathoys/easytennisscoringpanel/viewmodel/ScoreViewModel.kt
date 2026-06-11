@@ -11,6 +11,10 @@ class ScoreViewModel : ViewModel() {
     private val _state = MutableStateFlow(TennisState())
     val state: StateFlow<TennisState> = _state
 
+    fun setInitialState(state: TennisState) {
+        _state.value = state
+    }
+
     private val history = mutableListOf<TennisState>()
 
     fun pointA() {

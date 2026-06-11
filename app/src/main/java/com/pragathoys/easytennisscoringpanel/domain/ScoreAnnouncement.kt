@@ -29,3 +29,16 @@ fun buildAnnouncement(state: TennisState): String {
             "${state.aPoint.toDisplayName()} ${state.bPoint.toDisplayName()}"
     }
 }
+
+fun matchAnnouncement(state: TennisState): String {
+
+    if (state.matchOver) {
+        return "Game, Set and Match, ${state.winner}"
+    }
+
+    if (state.inTiebreak) {
+        return "Tiebreak"
+    }
+
+    return ""
+}

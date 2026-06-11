@@ -10,6 +10,7 @@ import com.pragathoys.easytennisscoringpanel.domain.GameMode
 import androidx.compose.runtime.LaunchedEffect
 import com.pragathoys.easytennisscoringpanel.speech.SpeechManager
 import com.pragathoys.easytennisscoringpanel.domain.buildAnnouncement
+import com.pragathoys.easytennisscoringpanel.domain.matchAnnouncement
 
 
 @Composable
@@ -18,9 +19,11 @@ fun ScoreboardScreen(vm: ScoreViewModel, speechManager: SpeechManager) {
     val state by vm.state.collectAsState()
 
     LaunchedEffect(state) {
-        speechManager.speak(
-            buildAnnouncement(state)
-        )
+        if (state.speechEnabled) {
+            speechManager.speak(
+                buildAnnouncement(state) + " " + matchAnnouncement(state)
+            )
+        }
     }
 
     Column(
@@ -31,8 +34,8 @@ fun ScoreboardScreen(vm: ScoreViewModel, speechManager: SpeechManager) {
 
         Spacer(Modifier.height(20.dp))
 
-        Text("Player A: ${state.aGames} games | ${state.aPoint}")
-        Text("Player B: ${state.bGames} games | ${state.bPoint}")
+        Text("${state.playerAName}: ${state.aSets} set | ${state.aGames} games | ${state.aPoint}")
+        Text("${state.playerBName}: ${state.bSets} set | ${state.bGames} games | ${state.bPoint}")
 
         Text(
             text = when (state.mode) {
@@ -49,6 +52,19 @@ fun ScoreboardScreen(vm: ScoreViewModel, speechManager: SpeechManager) {
                 GameMode.ADV_A -> "ADVANTAGE A"
                 GameMode.ADV_B -> "ADVANTAGE B"
                 else -> state.mode.name
+            }
+        )
+        Text(
+            text = when (state.inTiebreak) {
+                state.inTiebreak -> "In Tiebreak!!"
+                else -> ""
+            }
+        )
+
+        Text(
+            text = when {
+                state.matchOver -> "MATCH OVER"
+                else -> "LIVE"
             }
         )
 
@@ -77,6 +93,14 @@ fun ScoreboardScreen(vm: ScoreViewModel, speechManager: SpeechManager) {
 
             Button(onClick = { vm.reset() }) {
                 Text("RESET")
+            }
+        }
+
+        Row{
+            Button(onClick = {
+                speechManager.speak("Welcome to the Easy Tennis Score Panel!!")
+            }) {
+                Text("Test Voice")
             }
         }
     }
