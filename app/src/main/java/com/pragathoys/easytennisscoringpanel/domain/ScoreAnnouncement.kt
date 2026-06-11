@@ -68,9 +68,21 @@ fun matchAnnouncement(state: TennisState): String {
         return "Game, Set and Match, ${state.winner}. Score: ${state.aSets} sets to ${state.bSets}"
     }
 
-    if (state.aGames == 0 && state.bGames == 0 && (state.aSets > 0 || state.bSets > 0)) {
-        // Set just finished or new set starting
-        return "Game and set. ${state.aSets} sets to ${state.bSets}"
+    // Only announce "Game and set" when points are zero AND games are zero AND it's not the very start of the match
+    if (state.aPoint == Point.ZERO && state.bPoint == Point.ZERO && 
+        state.aGames == 0 && state.bGames == 0 && 
+        (state.aSets > 0 || state.bSets > 0) &&
+        !state.inTiebreak) {
+
+        // Game just finished
+        val setsScore = if (state.aSets > state.bSets) {
+            "${state.playerAName} leads ${state.aSets} sets to ${state.bSets}"
+        } else if (state.bSets > state.aSets) {
+            "${state.playerBName} leads ${state.bSets} sets to ${state.aSets}"
+        } else {
+            "${state.aSets} sets all"
+        }
+        return "Game. $setsScore"
     }
 
     if (state.inTiebreak) {

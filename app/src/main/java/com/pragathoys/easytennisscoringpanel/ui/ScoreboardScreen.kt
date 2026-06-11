@@ -25,7 +25,8 @@ import com.pragathoys.easytennisscoringpanel.domain.matchAnnouncement
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScoreboardScreen(vm: ScoreViewModel, speechManager: SpeechManager, onOpenSettings: () -> Unit) {
-    val state by vm.state.collectAsState()
+    val stateNullable by vm.stateFlow.collectAsState()
+    val state = stateNullable ?: return // Don't render until initialized
 
     LaunchedEffect(state) {
         if (state.speechEnabled) {

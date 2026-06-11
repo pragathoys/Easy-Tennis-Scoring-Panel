@@ -5,26 +5,36 @@ import com.pragathoys.easytennisscoringpanel.domain.TennisEngine
 import com.pragathoys.easytennisscoringpanel.domain.TennisState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 
 class ScoreViewModel : ViewModel() {
 
-    private val _state = MutableStateFlow(TennisState())
-    val state: StateFlow<TennisState> = _state
+    private val _state = MutableStateFlow<TennisState?>(null)
+    // We expose a flow that filters out the initial null
+    // But since collectAsState needs an initial value, we keep it nullable and handle in UI or use a dummy
+    val stateFlow = _state.asStateFlow()
 
     fun setInitialState(state: TennisState) {
-        _state.value = state
+        if (_state.value == null) {
+            _state.value = state
+        }
     }
 
     private val history = mutableListOf<TennisState>()
 
     fun pointA() {
-        save()
-        _state.value = TennisEngine.pointWon(_state.value, true)
+        _state.value?.let { current ->
+            save(current)
+            _state.value = TennisEngine.pointWon(current, true)
+        }
     }
 
     fun pointB() {
-        save()
-        _state.value = TennisEngine.pointWon(_state.value, false)
+        _state.value?.let { current ->
+            save(current)
+            _state.value = TennisEngine.pointWon(current, false)
+        }
     }
 
     fun undo() {
@@ -34,11 +44,20 @@ class ScoreViewModel : ViewModel() {
     }
 
     fun reset() {
-        save()
-        _state.value = TennisState()
+        _state.value?.let { current ->
+            save(current)
+            // Reset to a fresh state but keep the configuration
+            _state.value = TennisState(
+                matchFormat = current.matchFormat,
+                playerAName = current.playerAName,
+                playerBName = current.playerBName,
+                isDoubles = current.isDoubles,
+                speechEnabled = current.speechEnabled
+            )
+        }
     }
 
-    private fun save() {
-        history.add(_state.value)
+    private fun save(current: TennisState) {
+        history.add(current)
     }
 }
