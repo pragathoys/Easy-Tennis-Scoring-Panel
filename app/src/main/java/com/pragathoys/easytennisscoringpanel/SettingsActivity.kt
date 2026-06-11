@@ -2,6 +2,7 @@ package com.pragathoys.easytennisscoringpanel
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,12 +16,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 class SettingsActivity : ComponentActivity() {
+    private val prefs: SharedPreferences by lazy {
+        getSharedPreferences("tennis_settings", Context.MODE_PRIVATE)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
                 SettingsScreen(
+                    prefs = prefs,
                     onStartMatch = { bestOf, isDoubles, nameA, nameB, speechEnabled ->
+                        // Save to persistent storage
+                        prefs.edit().apply {
+                            putInt("BEST_OF", bestOf)
+                            putBoolean("IS_DOUBLES", isDoubles)
+                            putString("PLAYER_A", nameA)
+                            putString("PLAYER_B", nameB)
+                            putBoolean("SPEECH_ENABLED", speechEnabled)
+                            apply()
+                        }
+
                         val intent = Intent(this, MainActivity::class.java).apply {
                             putExtra("BEST_OF", bestOf)
                             putExtra("IS_DOUBLES", isDoubles)
@@ -39,12 +55,12 @@ class SettingsActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(onStartMatch: (Int, Boolean, String, String, Boolean) -> Unit) {
-    var bestOfSets by remember { mutableStateOf(3) } // 3 or 5
-    var isDoubles by remember { mutableStateOf(false) }
-    var playerAName by remember { mutableStateOf("Player A") }
-    var playerBName by remember { mutableStateOf("Player B") }
-    var speechEnabled by remember { mutableStateOf(true) }
+fun SettingsScreen(prefs: SharedPreferences, onStartMatch: (Int, Boolean, String, String, Boolean) -> Unit) {
+    var bestOfSets by remember { mutableIntStateOf(prefs.getInt("BEST_OF", 3)) }
+    var isDoubles by remember { mutableStateOf(prefs.getBoolean("IS_DOUBLES", false)) }
+    var playerAName by remember { mutableStateOf(prefs.getString("PLAYER_A", "Player A") ?: "Player A") }
+    var playerBName by remember { mutableStateOf(prefs.getString("PLAYER_B", "Player B") ?: "Player B") }
+    var speechEnabled by remember { mutableStateOf(prefs.getBoolean("SPEECH_ENABLED", true)) }
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Match Configuration") }) }

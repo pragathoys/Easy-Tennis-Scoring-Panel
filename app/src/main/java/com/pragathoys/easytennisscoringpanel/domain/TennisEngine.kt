@@ -203,7 +203,7 @@ object TennisEngine {
                 inTiebreak = false,
                 matchOver = true,
 
-                winner = if (playerA) "PLAYER A" else "PLAYER B"
+                winner = if (playerA) state.playerAName else state.playerBName
             )
         }
 
