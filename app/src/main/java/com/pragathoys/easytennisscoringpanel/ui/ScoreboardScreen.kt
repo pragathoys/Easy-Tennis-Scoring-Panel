@@ -47,51 +47,42 @@ fun ScoreboardScreen(vm: ScoreViewModel, speechManager: SpeechManager, onOpenSet
 
             Spacer(Modifier.height(10.dp))
 
-            Text("${state.playerAName}: ${state.aSets} set | ${state.aGames} games | ${state.aPoint}")
-            Text("${state.playerBName}: ${state.bSets} set | ${state.bGames} games | ${state.bPoint}")
+            val aPointDisplay = when (state.mode) {
+                GameMode.ADV_A -> "Ad"
+                GameMode.ADV_B -> "40"
+                else -> state.aPoint.displayValue
+            }
 
-            Text(
-                text = when (state.mode) {
-                    GameMode.DEUCE -> "DEUCE"
-                    GameMode.ADV_A -> "ADVANTAGE A"
-                    GameMode.ADV_B -> "ADVANTAGE B"
-                    else -> ""
-                }
-            )
-            Text(
-                text = when (state.mode) {
-                    GameMode.NORMAL -> "normal"
-                    GameMode.DEUCE -> "DEUCE"
-                    GameMode.ADV_A -> "ADVANTAGE A"
-                    GameMode.ADV_B -> "ADVANTAGE B"
-                    else -> state.mode.name
-                }
-            )
-            Text(
-                text = when (state.inTiebreak) {
-                    state.inTiebreak -> "In Tiebreak!!"
-                    else -> ""
-                }
-            )
+            val bPointDisplay = when (state.mode) {
+                GameMode.ADV_B -> "Ad"
+                GameMode.ADV_A -> "40"
+                else -> state.bPoint.displayValue
+            }
 
-            Text(
-                text = when {
-                    state.matchOver -> "MATCH OVER"
-                    else -> "LIVE"
-                }
-            )
+            Text("${state.playerAName}: ${state.aSets} Sets | ${state.aGames} Games | Score: $aPointDisplay")
+            Text("${state.playerBName}: ${state.bSets} Sets | ${state.bGames} Games | Score: $bPointDisplay")
+
+            Spacer(Modifier.height(10.dp))
+
+            val statusText = when {
+                state.matchOver -> "MATCH OVER - WINNER: ${state.winner}"
+                state.inTiebreak -> "IN TIEBREAK"
+                state.mode == GameMode.DEUCE -> "DEUCE"
+                else -> "LIVE"
+            }
+            Text(text = "Status: $statusText", style = MaterialTheme.typography.titleMedium)
 
             Spacer(Modifier.height(30.dp))
 
             Row {
                 Button(onClick = { vm.pointA() }) {
-                    Text("+ A")
+                    Text("Point ${state.playerAName}")
                 }
 
                 Spacer(Modifier.width(10.dp))
 
                 Button(onClick = { vm.pointB() }) {
-                    Text("+ B")
+                    Text("Point ${state.playerBName}")
                 }
             }
 
@@ -109,12 +100,12 @@ fun ScoreboardScreen(vm: ScoreViewModel, speechManager: SpeechManager, onOpenSet
                 }
             }
 
-            Row {
-                Button(onClick = {
-                    speechManager.speak("Welcome to the Easy Tennis Score Panel!!")
-                }) {
-                    Text("Test Voice")
-                }
+            Spacer(Modifier.height(10.dp))
+
+            Button(onClick = {
+                speechManager.speak("Welcome to the Easy Tennis Score Panel!!")
+            }) {
+                Text("Test Voice")
             }
         }
     }

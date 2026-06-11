@@ -1,7 +1,11 @@
 package com.pragathoys.easytennisscoringpanel.domain
 
-enum class Point {
-    ZERO, FIFTEEN, THIRTY, FORTY, ADV
+enum class Point(val displayValue: String) {
+    ZERO("0"), 
+    FIFTEEN("15"), 
+    THIRTY("30"), 
+    FORTY("40"), 
+    ADV("Ad")
 }
 
 enum class GameMode {
