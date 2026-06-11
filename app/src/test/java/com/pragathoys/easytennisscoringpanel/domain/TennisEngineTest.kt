@@ -117,12 +117,12 @@ class TennisEngineTest {
         
         assertEquals(2, state.aSets)
         assertEquals(true, state.matchOver)
-        assertEquals("PLAYER A", state.winner)
+        assertEquals("Player A", state.winner)
     }
 
     @Test
     fun `not win match best of 5 at 2 sets`() {
-        var state = TennisState(aSets = 1, aGames = 5, aPoint = Point.FORTY, bestOfSets = 5)
+        var state = TennisState(matchFormat = MatchFormat.BEST_OF_5, aSets = 1, aGames = 5, aPoint = Point.FORTY)
         state = TennisEngine.pointWon(state, true)
         
         assertEquals(2, state.aSets)
@@ -131,11 +131,62 @@ class TennisEngineTest {
 
     @Test
     fun `win match best of 5 at 3 sets`() {
-        var state = TennisState(aSets = 2, aGames = 5, aPoint = Point.FORTY, bestOfSets = 5)
+        var state = TennisState(matchFormat = MatchFormat.BEST_OF_5, aSets = 2, aGames = 5, aPoint = Point.FORTY)
         state = TennisEngine.pointWon(state, true)
         
         assertEquals(3, state.aSets)
         assertEquals(true, state.matchOver)
-        assertEquals("PLAYER A", state.winner)
+        assertEquals("Player A", state.winner)
+    }
+
+    @Test
+    fun `tiebreak scoring is point-by-point`() {
+        var state = TennisState(inTiebreak = true, aTiebreakPoints = 0, bTiebreakPoints = 0)
+        
+        state = TennisEngine.pointWon(state, true) // 1-0
+        assertEquals(1, state.aTiebreakPoints)
+        assertEquals(0, state.bTiebreakPoints)
+        
+        state = TennisEngine.pointWon(state, false) // 1-1
+        assertEquals(1, state.aTiebreakPoints)
+        assertEquals(1, state.bTiebreakPoints)
+    }
+
+    @Test
+    fun `win tiebreak at 7-5`() {
+        var state = TennisState(inTiebreak = true, aTiebreakPoints = 6, bTiebreakPoints = 5)
+        state = TennisEngine.pointWon(state, true)
+        
+        assertEquals(false, state.inTiebreak)
+        assertEquals(0, state.aTiebreakPoints)
+        assertEquals(1, state.aSets)
+    }
+
+    @Test
+    fun `super tiebreak starts after 1-1 sets`() {
+        var state = TennisState(matchFormat = MatchFormat.TWO_SETS_AND_SUPER_TIEBREAK, aSets = 1, bSets = 0, bGames = 5, bPoint = Point.FORTY)
+        // B wins set to make it 1-1
+        state = TennisEngine.pointWon(state, false)
+        
+        assertEquals(1, state.aSets)
+        assertEquals(1, state.bSets)
+        assertEquals(true, state.inTiebreak)
+        assertEquals(true, state.isSuperTiebreak)
+    }
+
+    @Test
+    fun `win match via super tiebreak at 10-8`() {
+        var state = TennisState(
+            matchFormat = MatchFormat.TWO_SETS_AND_SUPER_TIEBREAK, 
+            aSets = 1, bSets = 1, 
+            inTiebreak = true, isSuperTiebreak = true,
+            aTiebreakPoints = 9, bTiebreakPoints = 8
+        )
+        
+        state = TennisEngine.pointWon(state, true)
+        
+        assertEquals(2, state.aSets)
+        assertEquals(true, state.matchOver)
+        assertEquals("Player A", state.winner)
     }
 }

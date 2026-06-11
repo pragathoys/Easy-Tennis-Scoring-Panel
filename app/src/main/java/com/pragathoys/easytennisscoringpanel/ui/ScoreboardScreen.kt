@@ -47,16 +47,24 @@ fun ScoreboardScreen(vm: ScoreViewModel, speechManager: SpeechManager, onOpenSet
 
             Spacer(Modifier.height(10.dp))
 
-            val aPointDisplay = when (state.mode) {
-                GameMode.ADV_A -> "Ad"
-                GameMode.ADV_B -> "40"
-                else -> state.aPoint.displayValue
+            val aPointDisplay = if (state.inTiebreak) {
+                state.aTiebreakPoints.toString()
+            } else {
+                when (state.mode) {
+                    GameMode.ADV_A -> "Ad"
+                    GameMode.ADV_B -> "40"
+                    else -> state.aPoint.displayValue
+                }
             }
 
-            val bPointDisplay = when (state.mode) {
-                GameMode.ADV_B -> "Ad"
-                GameMode.ADV_A -> "40"
-                else -> state.bPoint.displayValue
+            val bPointDisplay = if (state.inTiebreak) {
+                state.bTiebreakPoints.toString()
+            } else {
+                when (state.mode) {
+                    GameMode.ADV_B -> "Ad"
+                    GameMode.ADV_A -> "40"
+                    else -> state.bPoint.displayValue
+                }
             }
 
             Text("${state.playerAName}: ${state.aSets} Sets | ${state.aGames} Games | Score: $aPointDisplay")
@@ -66,6 +74,7 @@ fun ScoreboardScreen(vm: ScoreViewModel, speechManager: SpeechManager, onOpenSet
 
             val statusText = when {
                 state.matchOver -> "MATCH OVER - WINNER: ${state.winner}"
+                state.isSuperTiebreak -> "IN SUPER TIEBREAK"
                 state.inTiebreak -> "IN TIEBREAK"
                 state.mode == GameMode.DEUCE -> "DEUCE"
                 else -> "LIVE"

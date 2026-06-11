@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.pragathoys.easytennisscoringpanel.domain.MatchFormat
 import com.pragathoys.easytennisscoringpanel.domain.TennisState
 import com.pragathoys.easytennisscoringpanel.speech.SpeechManager
 import com.pragathoys.easytennisscoringpanel.ui.ScoreboardScreen
@@ -20,18 +21,18 @@ class MainActivity : ComponentActivity() {
 
         speechManager = SpeechManager(this)
 
-        // Try to get from Intent (passed from SettingsActivity)
-        // If not present (e.g. app restart), fallback to SharedPreferences
         val prefs = getSharedPreferences("tennis_settings", Context.MODE_PRIVATE)
 
-        val bestOf = intent.getIntExtra("BEST_OF", prefs.getInt("BEST_OF", 3))
+        val formatStr = intent.getStringExtra("MATCH_FORMAT") ?: prefs.getString("MATCH_FORMAT", MatchFormat.TWO_SETS_AND_SUPER_TIEBREAK.name) ?: MatchFormat.TWO_SETS_AND_SUPER_TIEBREAK.name
+        val matchFormat = try { MatchFormat.valueOf(formatStr) } catch (e: Exception) { MatchFormat.TWO_SETS_AND_SUPER_TIEBREAK }
+        
         val isDoubles = intent.getBooleanExtra("IS_DOUBLES", prefs.getBoolean("IS_DOUBLES", false))
         val playerA = intent.getStringExtra("PLAYER_A") ?: prefs.getString("PLAYER_A", "Player A") ?: "Player A"
         val playerB = intent.getStringExtra("PLAYER_B") ?: prefs.getString("PLAYER_B", "Player B") ?: "Player B"
         val speechEnabled = intent.getBooleanExtra("SPEECH_ENABLED", prefs.getBoolean("SPEECH_ENABLED", true))
 
         val initialState = TennisState(
-            bestOfSets = bestOf,
+            matchFormat = matchFormat,
             isDoubles = isDoubles,
             playerAName = playerA,
             playerBName = playerB,

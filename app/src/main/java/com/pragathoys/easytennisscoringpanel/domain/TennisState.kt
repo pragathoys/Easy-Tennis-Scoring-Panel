@@ -24,10 +24,19 @@ enum class MatchMode {
     TIEBREAK
 }
 
+enum class MatchFormat {
+    BEST_OF_3,
+    BEST_OF_5,
+    TWO_SETS_AND_SUPER_TIEBREAK
+}
+
 data class TennisState(
     // Current Game
     val aPoint: Point = Point.ZERO,
     val bPoint: Point = Point.ZERO,
+    // Current Tiebreak Points
+    val aTiebreakPoints: Int = 0,
+    val bTiebreakPoints: Int = 0,
     // Current Set
     val aGames: Int = 0,
     val bGames: Int = 0,
@@ -38,6 +47,7 @@ data class TennisState(
 
     // Tiebreak
     val inTiebreak: Boolean = false,
+    val isSuperTiebreak: Boolean = false,
     // Match is over
     val matchOver: Boolean = false,
 
@@ -45,6 +55,7 @@ data class TennisState(
     val winner: String? = null,
 
     // Match config
+    val matchFormat: MatchFormat = MatchFormat.TWO_SETS_AND_SUPER_TIEBREAK,
     val bestOfSets: Int = 3,
     val playerAName: String = "Player A",
     val playerBName: String = "Player B",

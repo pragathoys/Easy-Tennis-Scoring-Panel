@@ -13,7 +13,17 @@ fun Point.toDisplayName(): String {
 fun buildAnnouncement(state: TennisState): String {
     if (state.matchOver) return ""
 
-    if (state.aPoint == Point.ZERO && state.bPoint == Point.ZERO && !state.inTiebreak) {
+    if (state.inTiebreak) {
+        return if (state.aTiebreakPoints > state.bTiebreakPoints) {
+            "${state.playerAName} leads ${state.aTiebreakPoints} to ${state.bTiebreakPoints}"
+        } else if (state.bTiebreakPoints > state.aTiebreakPoints) {
+            "${state.playerBName} leads ${state.bTiebreakPoints} to ${state.aTiebreakPoints}"
+        } else {
+            "${state.aTiebreakPoints}  all"
+        }
+    }
+
+    if (state.aPoint == Point.ZERO && state.bPoint == Point.ZERO) {
         if (state.aGames == 0 && state.bGames == 0) {
             return "New game"
         }
@@ -60,7 +70,7 @@ fun matchAnnouncement(state: TennisState): String {
     }
 
     if (state.inTiebreak) {
-        return "Tiebreak"
+        return " in Tiebreak"
     }
 
     return ""

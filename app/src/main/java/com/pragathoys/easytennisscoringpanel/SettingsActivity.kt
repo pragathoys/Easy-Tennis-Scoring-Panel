@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.pragathoys.easytennisscoringpanel.domain.MatchFormat
 
 class SettingsActivity : ComponentActivity() {
     private val prefs: SharedPreferences by lazy {
@@ -26,10 +27,10 @@ class SettingsActivity : ComponentActivity() {
             MaterialTheme {
                 SettingsScreen(
                     prefs = prefs,
-                    onStartMatch = { bestOf, isDoubles, nameA, nameB, speechEnabled ->
+                    onStartMatch = { format, isDoubles, nameA, nameB, speechEnabled ->
                         // Save to persistent storage
                         prefs.edit().apply {
-                            putInt("BEST_OF", bestOf)
+                            putString("MATCH_FORMAT", format.name)
                             putBoolean("IS_DOUBLES", isDoubles)
                             putString("PLAYER_A", nameA)
                             putString("PLAYER_B", nameB)
@@ -38,7 +39,7 @@ class SettingsActivity : ComponentActivity() {
                         }
 
                         val intent = Intent(this, MainActivity::class.java).apply {
-                            putExtra("BEST_OF", bestOf)
+                            putExtra("MATCH_FORMAT", format.name)
                             putExtra("IS_DOUBLES", isDoubles)
                             putExtra("PLAYER_A", nameA)
                             putExtra("PLAYER_B", nameB)
@@ -55,8 +56,10 @@ class SettingsActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(prefs: SharedPreferences, onStartMatch: (Int, Boolean, String, String, Boolean) -> Unit) {
-    var bestOfSets by remember { mutableIntStateOf(prefs.getInt("BEST_OF", 3)) }
+fun SettingsScreen(prefs: SharedPreferences, onStartMatch: (MatchFormat, Boolean, String, String, Boolean) -> Unit) {
+    var matchFormat by remember { 
+        mutableStateOf(MatchFormat.valueOf(prefs.getString("MATCH_FORMAT", MatchFormat.TWO_SETS_AND_SUPER_TIEBREAK.name) ?: MatchFormat.TWO_SETS_AND_SUPER_TIEBREAK.name)) 
+    }
     var isDoubles by remember { mutableStateOf(prefs.getBoolean("IS_DOUBLES", false)) }
     var playerAName by remember { mutableStateOf(prefs.getString("PLAYER_A", "Player A") ?: "Player A") }
     var playerBName by remember { mutableStateOf(prefs.getString("PLAYER_B", "Player B") ?: "Player B") }
@@ -74,12 +77,19 @@ fun SettingsScreen(prefs: SharedPreferences, onStartMatch: (Int, Boolean, String
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text("Match Format", style = MaterialTheme.typography.titleMedium)
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                RadioButton(selected = bestOfSets == 3, onClick = { bestOfSets = 3 })
-                Text("Best of 3")
-                Spacer(modifier = Modifier.width(16.dp))
-                RadioButton(selected = bestOfSets == 5, onClick = { bestOfSets = 5 })
-                Text("Best of 5")
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(selected = matchFormat == MatchFormat.TWO_SETS_AND_SUPER_TIEBREAK, onClick = { matchFormat = MatchFormat.TWO_SETS_AND_SUPER_TIEBREAK })
+                    Text("2 Sets + Super Tiebreak (10 pts)")
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(selected = matchFormat == MatchFormat.BEST_OF_3, onClick = { matchFormat = MatchFormat.BEST_OF_3 })
+                    Text("Best of 3 Sets")
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(selected = matchFormat == MatchFormat.BEST_OF_5, onClick = { matchFormat = MatchFormat.BEST_OF_5 })
+                    Text("Best of 5 Sets")
+                }
             }
 
             Text("Match Type", style = MaterialTheme.typography.titleMedium)
@@ -111,7 +121,7 @@ fun SettingsScreen(prefs: SharedPreferences, onStartMatch: (Int, Boolean, String
             }
 
             Button(
-                onClick = { onStartMatch(bestOfSets, isDoubles, playerAName, playerBName, speechEnabled) },
+                onClick = { onStartMatch(matchFormat, isDoubles, playerAName, playerBName, speechEnabled) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Start Match")

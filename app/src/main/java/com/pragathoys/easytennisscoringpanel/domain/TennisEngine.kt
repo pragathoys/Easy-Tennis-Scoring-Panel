@@ -8,6 +8,9 @@ object TennisEngine {
             return state
         }
 
+        if (state.inTiebreak) {
+            return handleTiebreak(state, playerA)
+        }
 
         return when (state.mode) {
             GameMode.NEW_GAME -> handleNormal(state, playerA)
@@ -71,6 +74,18 @@ object TennisEngine {
         }
     }
 
+    private fun handleTiebreak(state: TennisState, playerA: Boolean): TennisState {
+        val newA = if (playerA) state.aTiebreakPoints + 1 else state.aTiebreakPoints
+        val newB = if (!playerA) state.bTiebreakPoints + 1 else state.bTiebreakPoints
+
+        if (isTiebreakWon(newA, newB, state.isSuperTiebreak)) {
+            return winSet(state.copy(aTiebreakPoints = newA, bTiebreakPoints = newB), playerA)
+                .copy(aTiebreakPoints = 0, bTiebreakPoints = 0, inTiebreak = false, isSuperTiebreak = false)
+        }
+
+        return state.copy(aTiebreakPoints = newA, bTiebreakPoints = newB)
+    }
+
     private fun winGame(state: TennisState, playerA: Boolean): TennisState {
 //        return if (playerA) {
 //            state.copy(
@@ -132,8 +147,9 @@ object TennisEngine {
                 kotlin.math.abs(aVal - bVal) >= 2
     }
 
-    private fun isTiebreakWon(a: Int, b: Int): Boolean {
-        return (a >= 7 || b >= 7) &&
+    private fun isTiebreakWon(a: Int, b: Int, isSuper: Boolean): Boolean {
+        val target = if (isSuper) 10 else 7
+        return (a >= target || b >= target) &&
                 kotlin.math.abs(a - b) >= 2
     }
 
@@ -154,9 +170,12 @@ object TennisEngine {
         return false
     }
 
-    private fun isMatchWon(aSets: Int, bSets: Int, bestOf: Int): Boolean {
-        val setsToWin = (bestOf / 2) + 1
-        return aSets >= setsToWin || bSets >= setsToWin
+    private fun isMatchWon(state: TennisState, aSets: Int, bSets: Int): Boolean {
+        return when (state.matchFormat) {
+            MatchFormat.BEST_OF_3 -> aSets == 2 || bSets == 2
+            MatchFormat.BEST_OF_5 -> aSets == 3 || bSets == 3
+            MatchFormat.TWO_SETS_AND_SUPER_TIEBREAK -> aSets == 2 || bSets == 2
+        }
     }
 
     private fun winTiebreak(
@@ -188,7 +207,7 @@ object TennisEngine {
         val newAsets = if (playerA) state.aSets + 1 else state.aSets
         val newBsets = if (!playerA) state.bSets + 1 else state.bSets
 
-        val matchWon = isMatchWon(newAsets, newBsets, state.bestOfSets)
+        val matchWon = isMatchWon(state, newAsets, newBsets)
 
         if (matchWon) {
             return state.copy(
@@ -201,9 +220,23 @@ object TennisEngine {
                 bPoint = Point.ZERO,
 
                 inTiebreak = false,
+                isSuperTiebreak = false,
                 matchOver = true,
 
                 winner = if (playerA) state.playerAName else state.playerBName
+            )
+        }
+
+        if (state.matchFormat == MatchFormat.TWO_SETS_AND_SUPER_TIEBREAK && newAsets == 1 && newBsets == 1) {
+            return state.copy(
+                aSets = newAsets,
+                bSets = newBsets,
+                aGames = 0,
+                bGames = 0,
+                aPoint = Point.ZERO,
+                bPoint = Point.ZERO,
+                inTiebreak = true,
+                isSuperTiebreak = true
             )
         }
 
@@ -216,7 +249,8 @@ object TennisEngine {
             aPoint = Point.ZERO,
             bPoint = Point.ZERO,
 
-            inTiebreak = false
+            inTiebreak = false,
+            isSuperTiebreak = false
         )
     }
     private fun toInt(p: Point): Int {
