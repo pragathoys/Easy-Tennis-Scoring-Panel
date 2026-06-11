@@ -7,12 +7,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.pragathoys.easytennisscoringpanel.viewmodel.ScoreViewModel
 import com.pragathoys.easytennisscoringpanel.domain.GameMode
+import androidx.compose.runtime.LaunchedEffect
+import com.pragathoys.easytennisscoringpanel.speech.SpeechManager
+import com.pragathoys.easytennisscoringpanel.domain.buildAnnouncement
 
 
 @Composable
-fun ScoreboardScreen(vm: ScoreViewModel) {
+fun ScoreboardScreen(vm: ScoreViewModel, speechManager: SpeechManager) {
 
     val state by vm.state.collectAsState()
+
+    LaunchedEffect(state) {
+        speechManager.speak(
+            buildAnnouncement(state)
+        )
+    }
 
     Column(
         modifier = Modifier.padding(20.dp)
